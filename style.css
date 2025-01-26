@@ -80,7 +80,7 @@ ul {
 }
 
 #box1 {
-	width: 745px;
+	width: 845px;
 	overflow: hidden;
 	margin: 0 0 35px 0;
 }
@@ -98,10 +98,22 @@ ul {
 }
 
 #content {
-	width: 745px;
+	width: 845px;
 	margin: 0 0 0 355px;
 	padding: 40px;
 	background: #fff;
+}
+
+/* Add bullets for lists in the main content area */
+#content ul {
+    list-style: disc; /* Restores bullets */
+    padding-left: 20px; /* Adds proper indentation */
+}
+
+/* Ensure no borders for general lists in the content */
+#content ul li {
+    border-top: none; /* Removes the dotted lines */
+    padding: 0; /* Reset padding if necessary */
 }
 
 #copyright {
@@ -181,7 +193,7 @@ ul {
 #main {
 	position: relative;
 	padding: 0;
-	width: 1180px;
+	width: 1330px;
 	color: #5e5e5e;
 }
 
@@ -198,12 +210,12 @@ ul {
 }
 
 #main ul {
-	list-style: none;
+	list-style: disc;
 }
 
 #main ul li {
-	padding: 15px 0 15px 0;
-	border-top: dotted 1px #b3b3b3;
+	padding: 5px 0 5px 0;
+	border-top: none;
 }
 
 #main ul li.first {
@@ -245,8 +257,9 @@ ul {
 
 #outer {
 	position: relative;
-	width: 1180px;
+	width: 1330px;
 	margin: 0 auto;
+	margin-left: 30px;
 	padding: 30px;
 }
 
