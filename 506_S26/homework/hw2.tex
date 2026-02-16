@@ -50,8 +50,6 @@
 
 For this homework, unless otherwise stated all groups are finite and all representations are finite dimensional and complex.
 
-\textcolor{blue}{More problems to come!}
-
 \begin{enumerate}
 
 \item[1.] Let $V$ and $W$ be $G$-representations, with $W$ irreducible. Prove that the following map $V\to V$ is a $G$-equivariant projection onto the $W$-isotypic component of $V$:
@@ -107,9 +105,26 @@ g\cdot f(g') := f(g'g).
     is a $G$-isomorphism.
 \end{enumerate}
 
+\item[6.] A \emph{virtual representation} over $\C$ of a finite group $G$ is a formal integer linear combination of irreducible $G$-representations (if all coefficients are nonnegative, this is an honest $G$-representation). Likewise, a \emph{virtual character} is an element of $\C_{\t{cl}}(G)$ with integer coefficients in the basis of irreducible characters.
 
+\begin{enumerate}
+    \item If $\chi$ is a virtual character and $(\chi,\chi)=1$, prove that (exactly) one of $\pm\chi$ is an irreducible character.
+    \item In the language of Lecture 9, fix a one-dimensional representation $\nu:L^\times\to\C$, let $\alpha = \nu|_{K^\times}$, and let $\rho_\nu$ be the virtual representation
+    \[
+    \rho_\nu := 
+    \widetilde{\rho}_1\otimes\rho_{\alpha_1} -  \rho_{\alpha_1} - \Ind_{L^\times}^G \nu.
+    \]
+    Compute the virtual character of $\rho_\nu$, and prove that it is irreducible.
 \end{enumerate}
 
-\textcolor{blue}{More problems to come!}
+\item[7.] Again use the setting of Lecture 9, and recall the Weil group $W := L^\times \rtimes \langle\sigma\rangle$, where $\sigma^2=1$ and $\sigma\ell = \ba{\ell}\sigma$ ($\sigma$ can be thought of as the nontrivial automorphism of $L$ fixing $K$).
+
+Let $\tau$ be a two-dimensional representation of $W$, and write $\tau|_{L^\times} = \nu_1\oplus\nu_2$.
+\begin{enumerate}
+    \item If $\tau$ is irreducible, show that $\ba{\nu_1} = \nu_2$, and both $\nu_1$ and $\nu_2$ do not factor through the norm map $N_{L/K}$.
+    \item If $\tau$ is reducible, show that $\nu_1$ and $\nu_2$ factor through $N_{L/K}$.
+\end{enumerate}
+
+\end{enumerate}
 
 \end{document}
