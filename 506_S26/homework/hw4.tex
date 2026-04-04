@@ -1,0 +1,137 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage, amsmath, amssymb, amsthm, amscd, setspace, bm, graphicx, indentfirst, multirow, tikz, enumerate, verbatim, appendix}
+\usepackage{adjustbox,amsfonts,array,graphicx,booktabs,tabularx,multirow,multicol,stmaryrd, tabu}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{hyperref}
+\usetikzlibrary{arrows.meta}
+
+\usepackage{ytableau}
+\ytableausetup{tabloids, centertableaux}
+
+\title{Math 506, Spring 2026 -- Homework 4}
+\date{}
+\setlength{\parskip}{0.5cm}
+\setlength{\parindent}{0cm}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\F}{\mathbb{F}}
+\renewcommand{\t}[1]{\text{#1}}
+\newcommand{\ba}{\overline}
+\newcommand{\Tr}{\text{Tr}}
+\newcommand{\Hom}{\text{Hom}}
+\newcommand{\End}{\text{End}}
+\newcommand{\Aut}{\text{Aut}}
+\newcommand{\Mat}{\text{Mat}}
+\newcommand{\Sym}{\text{Sym}}
+\newcommand{\Res}{\text{Res}}
+\newcommand{\Ind}{\text{Ind}}
+\newcommand{\ind}{\text{ind}}
+\newcommand{\wt}{\text{wt}}
+\newcommand{\Ad}{\text{Ad}}
+\newcommand{\ad}{\text{ad}}
+\newcommand{\tr}{\mathrm{tr}}
+
+\makeatletter
+\newcommand{\Wedge}{\@ifnextchar^\@Wedge{\@Wedge^{\,}}}
+\def\@Wedge^#1{\mathop{\bigwedge\nolimits^{\!#1}}}
+\makeatother
+
+\begin{document} \maketitle
+\vspace{-80pt}
+
+\textbf{Due:} Wednesday, April 8th, at 9:00am via Gradescope.
+
+\textbf{Instructions:} Students should complete and submit all problems. All assertions require proof unless otherwise stated. Typesetting your homework using LaTeX is recommended. For this homework, unless otherwise stated all groups are finite, all Lie algebras are complex and finite dimensional, and all representations are finite dimensional and complex.
+
+\begin{enumerate}
+
+\item[1.] Let $V$ be a finite dimensional vector space over a field $K$. Recall that an operator $A\in\End(V)$ is \emph{diagonalizable} if $V$ has a basis consisting of eigenvectors for $A$, and a set of operators $\mathcal{A}$ is \emph{simultaneously diagonalizable} if $V$ has a basis such that each basis vector is an eigenvector for all $A\in\mathcal{A}$.
+
+Let $\mathcal{A}\subseteq\End(V)$ be a set of diagonalizable operators on $V$. The goal of this problem is to prove that $\mathcal{A}$ is simultaneously diagonalizable if and only if its elements pairwise commute.
+
+\begin{enumerate}
+\item Prove that if $\mathcal{A}$ is simultaneously diagonalizable that its elements must pairwise commute.
+\item Let $A,B\in \End(V)$ be commuting operators. For an eigenvalue $\lambda$ of $A$, let $E_\lambda = \{v\in V | Av = \lambda v\}$ be its $\lambda$-eigenspace. Prove that $E_\lambda$ is a $B$-invariant subspace.
+\item Let $A\in\End(V)$, and let $W\le V$ be an $A$-invariant subspace. Prove that if $A$ is diagonalizable on $V$ that it is also diagonalizable on $W$.
+\item Use the proceding two parts to show that if $\mathcal{A}\subseteq\End(V)$ is a finite collection of diagonalizable operators on $V$ and its elements pairwise commute that $\mathcal{A}$ is simultaneously diagonalizable.
+\item Finally, show that the previous part holds even when $\mathcal{A}$ is infinite (but $V$ is still finite dimensional).
+\end{enumerate}
+
+\item[2.] For each of the irreducible rank 2 root systems, $A_2, B_2(=C_2)$, and $G_2$, verify explicitly that the Weyl group acts transitively on the sets of roots of a given length.
+
+\item[3.]
+\begin{enumerate}
+\item Let $X,C$ be $n\times n$ matrices, with $C$ invertible. Show that $e^{CXC^{-1}} = Ce^XC^{-1}$.
+\item Let $G$ be a matrix Lie group, with Lie algebra $\mathfrak{g}$. If $A\in G$, let $\Ad_A(X)= AXA^{-1}$. Show that $\Ad_A\in\mathfrak{gl}(\mathfrak{g})$; that is, show that $\Ad_A(X)\in\mathfrak{g}$ whenever $X\in\mathfrak{g}$, and $X\mapsto AXA^{-1}$ is a linear map.
+\item Since $\ad_X\in\mathfrak{gl}(\mathfrak{g})$, we can define $e^{\ad_X}\in\mathfrak{gl}(\mathfrak{g})$ by the matrix exponential. Prove that $e^{\ad_X}=\Ad_{e^X}$ for all $X\in\mathfrak{g}$.
+\end{enumerate}
+
+\item[4.] Let $G$ be a finite group, and equip $L^2(G) = \{f : G \to \C\}$ 
+with the inner product $\langle f_1, f_2 \rangle = \frac{1}{|G|}\sum_{g \in G} 
+f_1(g)\overline{f_2(g)}$. By HW1~\#4, $L^2(G)$ under left translation is the 
+regular representation, which by Corollary~13 decomposes as 
+$\bigoplus_\rho V_\rho^{\oplus d_\rho}$, where $d_\rho = \dim V_\rho$ and the 
+sum runs over all irreducible representations. The goal of this problem is to 
+find an explicit orthonormal basis realizing this decomposition, in analogy with 
+the Peter--Weyl theorem.
+
+For each irreducible representation $(\rho, V_\rho)$ of $G$, fix a $G$-invariant 
+inner product on $V_\rho$ and an orthonormal basis $\{e_i\}_{i=1}^{d_\rho}$ with 
+respect to that inner product. Let $\rho_{ij} : G \to \C$ be the matrix 
+coefficient $\rho_{ij}(g) = \langle e_i, \rho(g)e_j\rangle$; these are the 
+examples of matrix coefficients discussed in class, where $\rho_{ij}(g)$ is the 
+$(i,j)$-entry of $\rho(g)$.
+
+\begin{enumerate}
+    \item \emph{(Orthogonality of matrix coefficients.)} Let $\rho, \pi$ be 
+    irreducible representations of $G$. Show that
+    \[
+    \langle \rho_{ij}, \pi_{kl} \rangle = \begin{cases} 0 & \text{if } 
+    \rho \not\cong \pi, \\ \dfrac{\delta_{ik}\delta_{jl}}{d_\rho} & \text{if } 
+    \rho = \pi.\end{cases}
+    \]
+    In particular, the matrix coefficients of non-isomorphic irreducibles are 
+    orthogonal, and those of a single irreducible are orthogonal to one another.
+
+    \emph{(Hint: Mirroring the averaging approach we have used a few times, given 
+    a linear map $T : V_\pi \to V_\rho$, set $\hat{T} = \frac{1}{|G|}\sum_{g 
+    \in G} \rho(g)\,T\,\pi(g)^{-1}$. Show that $\hat{T}$ is $G$-equivariant, 
+    then apply Schur's lemma. Choose $T$ to be a well-chosen rank-one map to 
+    extract the desired inner products.)}
+
+    \item Using part (a) and Corollary~14, show that $\bigl\{\sqrt{d_\rho}\,
+    \rho_{ij} : \rho \text{ irreducible},\; 1 \le i,j \le d_\rho\bigr\}$ is an 
+    orthonormal basis for $L^2(G)$.
+\end{enumerate}
+
+\item[5.] Give an example of a matrix Lie group $G$ and a matrix $X$ such that $e^X\in G$ but $X$ is not in the Lie algebra $\mathfrak{g}$ of $G$.
+
+\begin{comment}
+\item[6.] Let $\mathfrak{g}$ be a complex Lie algebra. The \emph{Killing form} is 
+the symmetric bilinear form $B:\mathfrak{g}\times\mathfrak{g}\to\C$ defined by 
+$B(X,Y) = \tr(\ad_X\circ\ad_Y)$.
+\begin{enumerate}
+    \item Show that $B$ is $\Ad$-invariant: $B(\Ad_A(X),\Ad_A(Y)) = B(X,Y)$ 
+    for all $A\in G$, $X,Y\in\mathfrak{g}$.
+    (\emph{Hint: first show that $\ad_{\Ad_A(X)} = \Ad_A\circ\ad_X\circ\Ad_A^{-1}$ as operators on $\mathfrak{g}$.})
+    \item Compute $B$ explicitly for $\mathfrak{sl}_2(\C)$ with standard basis 
+    $e,f,h$ satisfying $[h,e]=2e$, $[h,f]=-2f$, $[e,f]=h$.
+\end{enumerate}
+\end{comment}
+
+\end{enumerate}
+
+\end{document}
