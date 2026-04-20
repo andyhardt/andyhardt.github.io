@@ -1,0 +1,203 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage, amsmath, amssymb, amsthm, amscd, setspace, bm, graphicx, indentfirst, multirow, tikz, enumerate, verbatim, appendix}
+\usepackage{adjustbox,amsfonts,array,graphicx,booktabs,tabularx,multirow,multicol,stmaryrd, tabu}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{hyperref}
+\usetikzlibrary{arrows.meta}
+
+\usepackage{ytableau}
+
+\title{Math 506, Spring 2026 -- Homework 5}
+\date{}
+\setlength{\parskip}{0.5cm}
+\setlength{\parindent}{0cm}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\F}{\mathbb{F}}
+\renewcommand{\t}[1]{\text{#1}}
+\newcommand{\ba}{\overline}
+\newcommand{\Tr}{\text{Tr}}
+\newcommand{\Hom}{\text{Hom}}
+\newcommand{\End}{\text{End}}
+\newcommand{\Aut}{\text{Aut}}
+\newcommand{\Mat}{\text{Mat}}
+\newcommand{\Sym}{\text{Sym}}
+\newcommand{\Res}{\text{Res}}
+\newcommand{\Ind}{\text{Ind}}
+\newcommand{\ind}{\text{ind}}
+\newcommand{\wt}{\text{wt}}
+\newcommand{\Ad}{\text{Ad}}
+\newcommand{\ad}{\text{ad}}
+\newcommand{\tr}{\mathrm{tr}}
+\newcommand{\ch}{\mathrm{ch}}
+\newcommand{\GL}{\mathrm{GL}}
+
+\makeatletter
+\newcommand{\Wedge}{\@ifnextchar^\@Wedge{\@Wedge^{\,}}}
+\def\@Wedge^#1{\mathop{\bigwedge\nolimits^{\!#1}}}
+\makeatother
+
+\begin{document} \maketitle
+\vspace{-80pt}
+
+\textbf{Due:} Wednesday, May 6th, at 9:00am via Gradescope.
+
+\textbf{Instructions:} Students should complete and submit all problems. All assertions require proof unless otherwise stated. Typesetting your homework using LaTeX is recommended. For this homework, unless otherwise stated all groups are finite, all Lie algebras are complex and finite dimensional, and all representations are finite dimensional and complex.
+
+\begin{enumerate}
+
+
+\item[1.] Recall the Frobenius characteristic map $\ch: R = \bigoplus_k R^k \to \Lambda$,
+where $R^k$ is the space of class functions on $S_k$, and the product on $R$ is defined by
+\[
+\chi \cdot \psi = \Ind^{S_{k+m}}_{S_k \times S_m}(\chi \otimes \psi)
+\]
+for $\chi \in R^k$, $\psi \in R^m$. Recall also that $\ch(f) = \sum_{\mu \vdash n} z_\mu^{-1} f_\mu\, p_\mu$
+for $f \in R^n$, where $f_\mu$ is the value of $f$ on elements of cycle type $\mu$.
+
+\begin{enumerate}
+\item Prove Theorem~79(d): $\ch: R \to \Lambda$ is a ring homomorphism, where
+$\Lambda$ has its usual multiplication of symmetric functions. That is, for
+$\chi \in R^k$ and $\psi \in R^m$, show that
+\[
+\ch(\chi \cdot \psi) = \ch(\chi)\ch(\psi).
+\]
+
+(\emph{Hint: We can extend the concept of class functions to take values in $\Lambda$ (or any other $\C$-algebra). The Hermitian inner-product from Lecture 5 extends coefficient-wise, and restriction, induction, and Frobenius reciprocity extend to these generalized class functions by linearity: for $H\leq G$, a class
+function $\chi$ on $G$, and any $\psi: H \to \Lambda$,
+\[
+( \chi, \Ind^G_H \psi )_G = ( \Res^G_H \chi, \psi)_H.
+\]
+Furthermore, $\ch(f) = (\ba{p},f) = (p,f)$ where $p: S_n \to \Lambda$ sends $w$ to $p_\mu$ for $w$ of cycle type $\mu$.})
+
+\item The \emph{Littlewood--Richardson coefficients} $c^\lambda_{\mu\nu}$, for
+$|\mu|+|\nu| = |\lambda|$, are defined as the tensor product multiplicities of
+polynomial $\GL_n(\C)$-representations:
+\[
+V^\mu \otimes V^\nu \cong \bigoplus_\lambda (V^\lambda)^{\oplus\, c^\lambda_{\mu\nu}}.
+\]
+(Since the character of $V^\lambda$ is $s_\lambda$, these are also the structure
+constants for the Schur basis: $s_\mu s_\nu = \sum_\lambda c^\lambda_{\mu\nu} s_\lambda$.)
+Using part~(a), show that as $S_n$ representations
+\[
+\Ind^{S_n}_{S_k \times S_m}(S^\mu \otimes S^\nu) \cong \bigoplus_\lambda
+(S^\lambda)^{\oplus\, c^\lambda_{\mu\nu}},
+\]
+and
+\[
+\Res^{S_n}_{S_k \times S_m} S^\lambda \cong \bigoplus_{\mu,\nu}
+(S^\mu \otimes S^\nu)^{\oplus\, c^\lambda_{\mu\nu}}.
+\]
+where $k = |\mu|$, $m = |\nu|$, and $n = k+m$. (Don't get confused between internal and external tensor product; the latter occurs when we have a direct product of groups.)
+\end{enumerate}
+
+
+\item[2.] The \emph{Kronecker coefficients} $g(\lambda, \mu, \nu)$, for
+$\lambda, \mu, \nu \vdash k$, are the tensor product multiplicities of
+$S_k$-representations:
+\[
+S^\lambda \otimes S^\mu \cong \bigoplus_{\nu \vdash k} (S^\nu)^{\oplus\, g(\lambda,\mu,\nu)}.
+\]
+The goal of this problem is to give a $\GL_n$-interpretation of these coefficients
+via Schur--Weyl duality. Throughout, let $V = \C^m$ with $m \geq k$, and $W = V\otimes V = \C^{m^2}$.
+
+\begin{enumerate}
+\item Apply Schur--Weyl duality to $V^{\otimes k} \otimes V^{\otimes k}$
+to show that, as $(\GL(V) \times \GL(V) \times S_k)$-representations,
+\[
+V^{\otimes k} \otimes V^{\otimes k}
+\cong \bigoplus_{\lambda, \mu, \nu \vdash k} g(\lambda,\mu,\nu)\;
+V^\lambda \otimes V^\mu \otimes S^\nu,
+\]
+where on the left side, the $S_k$ acts diagonally on the two $V^{\otimes k}$ factors, and on the right side, the two $\GL(V)$-factors act on $V^\lambda$ and $V^\mu$ respectively.
+
+\item Let $\GL(V) \times \GL(V)$ sit inside $\GL(W)$ via the Kronecker product $(A, B) \mapsto A \otimes B$. Show that the map $V^{\otimes k} \otimes V^{\otimes k} \xrightarrow{\sim} W^{\otimes k}$
+\[
+(v_1 \otimes \cdots \otimes v_k) \otimes (w_1 \otimes \cdots \otimes w_k)
+\mapsto (v_1 \otimes w_1) \otimes \cdots \otimes (v_k \otimes w_k)
+\]
+is an $(S_k\times \GL(V)\times \GL(V))$-equivariant isomorphism.
+
+\item Using Schur-Weyl duality for $W^{\otimes k}$ and parts~(a) and (b), conclude that
+as $\GL(V) \times \GL(V)$-representations,
+\[
+\Res^{\GL(W)}_{\GL(V) \times \GL(V)} W^\nu
+\cong \bigoplus_{\lambda, \mu \vdash k} g(\lambda,\mu,\nu)\; V^\lambda \otimes V^\mu.
+\]
+In particular,
+\[
+g(\lambda,\mu,\nu) = \dim \Hom_{\GL(V) \times \GL(V)}
+(V^\lambda \otimes V^\mu,\, W^\nu).
+\]
+\end{enumerate}
+
+
+\item[3.] Let $\mathfrak{g}$ be a complex Lie algebra. The \emph{Killing form} is
+the symmetric bilinear form $B:\mathfrak{g}\times\mathfrak{g}\to\C$ defined by
+$B(X,Y) = \tr(\ad_X\circ\ad_Y)$.
+\begin{enumerate}
+    \item Show that $B$ is $\Ad$-invariant: $B(\Ad_A(X),\Ad_A(Y)) = B(X,Y)$
+    for all $A\in G$, $X,Y\in\mathfrak{g}$.
+    (\emph{Hint: first show that $\ad_{\Ad_A(X)} = \Ad_A\circ\ad_X\circ\Ad_A^{-1}$ as operators on $\mathfrak{g}$.})
+    \item Compute $B$ explicitly for $\mathfrak{sl}_2(\C)$ with standard basis
+    $e,f,h$ satisfying $[h,e]=2e$, $[h,f]=-2f$, $[e,f]=h$.
+\end{enumerate}
+
+
+\item[4.] Let $Z = (z_{ij})_{1 \leq i,j \leq n}$ be an $n \times n$ matrix of
+indeterminates, and let $\GL_n(\C)$ act on $\C[z_{ij}]$ by $(g \cdot f)(Z) = f(Zg)$.
+For $S \subseteq [n]$ with $|S| = k$, write
+\[
+p_S = \det(z_{ij})_{1 \leq i \leq k,\; j \in S}
+\]
+for the minor of $Z$ using rows $1, \ldots, k$ and columns $S$. Let
+$N \leq \GL_n(\C)$ denote the subgroup of upper triangular matrices with $1$'s
+on the diagonal.
+
+\begin{enumerate}
+\item Show that $p_{[k]}$ is a highest weight vector of weight
+$\varepsilon_1 + \cdots + \varepsilon_k$ (recall $\varepsilon_i$ is the $i$th
+fundamental weight), and that the subrepresentation generated by $p_{[k]}$ is
+$\mathrm{span}\{p_S : |S| = k\} \cong \Wedge^k(\C^n)$.
+
+(\emph{Hint: Use the Cauchy--Binet formula.})
+
+\item For a partition $\lambda = (\lambda_1 \geq \cdots \geq \lambda_n \geq 0)$ of length $\leq n$, define
+\[
+\Delta_\lambda = \prod_{k=1}^{n} p_{[k]}^{\;\lambda_k - \lambda_{k+1}}.
+\]
+Show that $\Delta_\lambda$ is a highest weight vector of weight $\lambda$, and
+that the $\GL_n$-subrepresentation of $\C[z_{ij}]$ it generates is isomorphic
+to $V^\lambda$.
+
+(\emph{Hint: use Cauchy--Binet to show the polynomial $\GL_n$-representation generated by $\Delta_\lambda$ is finite-dimensional, hence completely reducible, and apply Part~6 of the proof sketch of Theorem~57, which you can assume holds equally well for $GL_n$.})
+
+\item Take $n = 3$ and $\lambda = (2,1,0)$. By part~(b), $V^{(2,1,0)}$ is
+the $\GL_3$-representation generated by
+$\Delta_{(2,1,0)} = p_{\{1\}} \cdot p_{\{1,2\}}= z_{11}(z_{11}z_{22} - z_{12}z_{21})$.
+Write out a basis for $V^{(2,1,0)}$ explicitly as polynomials in the $z_{ij}$.
+
+(\emph{Hint: by the Cauchy--Binet expansion from part~(b), $V^{(2,1,0)}$ is
+contained in the span of the $3 \times 3 = 9$ products $p_{\{s\}} \cdot
+p_{\{t,u\}}$ for $s \in [3]$, $\{t,u\} \subseteq [3]$. Find the linear
+relations among these nine products (you don't need a rigorous argument that you've found them all), and verify that the dimension equals that of $\dim V^{(2,1,0)}$.})
+\end{enumerate}
+
+\end{enumerate}
+
+\end{document}
+
+
