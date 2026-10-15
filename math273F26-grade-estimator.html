@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Math 273 Grade Estimator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a worksheet. Inputs on the left grouped by grading category, a running estimate pinned on the right (bottom bar on phones). */
+:root {
+  --bg: #f4f6f9;
+  --paper: #ffffff;
+  --ink: #18202c;
+  --muted: #5b6676;
+  --rule: #d9dee6;
+  --grid: #e9edf3;
+  --accent: #2b4c8c;
+  --accent-soft: #e5ecf8;
+  --miss: #b42318;
+  --miss-soft: #fdecea;
+  --wait: #8a5a00;
+  --wait-soft: #fdf3dc;
+  --exc: #4a5565;
+  --exc-soft: #eceff3;
+  --ok: #1f6b45;
+  --ok-soft: #e4f3ea;
+  --font-display: "Literata", Georgia, "Times New Roman", serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d; --paper: #1a2029; --ink: #e6eaf0; --muted: #9aa5b4; --rule: #2e3643; --grid: #222934;
+    --accent: #8fb0ee; --accent-soft: #23314a;
+    --miss: #f08a80; --miss-soft: #3a1f1d; --wait: #e8b960; --wait-soft: #352a14;
+    --exc: #b4bdca; --exc-soft: #262d38; --ok: #79cfa0; --ok-soft: #173327;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161d; --paper: #1a2029; --ink: #e6eaf0; --muted: #9aa5b4; --rule: #2e3643; --grid: #222934;
+  --accent: #8fb0ee; --accent-soft: #23314a;
+  --miss: #f08a80; --miss-soft: #3a1f1d; --wait: #e8b960; --wait-soft: #352a14;
+  --exc: #b4bdca; --exc-soft: #262d38; --ok: #79cfa0; --ok-soft: #173327;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 120px;
+}
+h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.3rem); font-weight: 650; letter-spacing: -0.01em; }
+h2 { font-size: 1.2rem; font-weight: 650; }
+.eyebrow { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+
+header.top { display: grid; gap: 14px; margin-bottom: 22px; }
+.top-row { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: end; justify-content: space-between; }
+.asof { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.asof label { font-weight: 600; }
+.asof small { color: var(--muted); }
+
+.notice {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--miss);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  display: grid;
+  gap: 6px;
+}
+.notice strong { font-weight: 700; }
+.notice ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.notice p { margin: 0; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 28px; align-items: start; }
+@media (max-width: 960px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+.sections { display: grid; gap: 22px; min-width: 0; }
+section.cat {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  min-width: 0;
+}
+.cat-head {
+  display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--rule);
+}
+.cat-head .rule { color: var(--muted); font-size: 0.88rem; }
+.cat-head .catpct { font-family: var(--font-num); font-weight: 600; color: var(--accent); }
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8.6rem 9rem 9.5rem 8.5rem;
+  grid-template-areas: "name due status score chip";
+  gap: 6px 12px;
+  align-items: center;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--grid);
+}
+.row:last-child { border-bottom: 0; }
+.row .name { grid-area: name; min-width: 0; }
+.row .name b { font-weight: 600; }
+.row .name span { color: var(--muted); font-size: 0.86rem; display: block; }
+.row .due { grid-area: due; color: var(--muted); font-size: 0.86rem; }
+.row .status { grid-area: status; }
+.row .score { grid-area: score; display: flex; align-items: center; gap: 6px; }
+.row .chipcell { grid-area: chip; display: flex; justify-content: flex-end; }
+.row .msg { grid-column: 1 / -1; color: var(--miss); font-size: 0.86rem; margin: 0; }
+.row.past .due { color: var(--ink); }
+
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name chip"
+      "due due"
+      "status score";
+  }
+  .row .due { font-size: 0.82rem; }
+  .row .score { justify-content: flex-end; }
+}
+
+select, input[type="text"], input[type="date"] {
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 6px 8px;
+  min-width: 0;
+}
+select { width: 100%; }
+input.pts { width: 4.4rem; text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+input.pts:disabled { opacity: 0.45; }
+input.pts[readonly] { background: transparent; border-style: dashed; }
+input.bad { border-color: var(--miss); background: var(--miss-soft); }
+.of { color: var(--muted); font-family: var(--font-num); font-size: 0.9rem; white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.chip {
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.01em;
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid transparent;
+}
+.chip.ok { background: var(--ok-soft); color: var(--ok); font-family: var(--font-num); }
+.chip.miss { background: var(--miss-soft); color: var(--miss); }
+.chip.wait { background: var(--wait-soft); color: var(--wait); }
+.chip.exc { background: var(--exc-soft); color: var(--exc); }
+.chip.future { color: var(--muted); border-color: var(--rule); }
+.chip.err { background: var(--miss); color: var(--paper); }
+.chip.drop { background: var(--exc-soft); color: var(--exc); font-family: var(--font-num); text-decoration: line-through; }
+
+
+aside.summary {
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + 16px);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+@media (max-width: 960px) { aside.summary { position: static; } }
+.big { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.big .pct { font-family: var(--font-num); font-size: 2.4rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.letter {
+  font-family: var(--font-display); font-weight: 650; font-size: 1.7rem;
+  color: var(--accent); background: var(--accent-soft);
+  border-radius: 6px; padding: 0 12px; line-height: 1.4;
+}
+.sub { color: var(--muted); font-size: 0.88rem; margin: 0; }
+table.cats { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+table.cats th, table.cats td { padding: 5px 0; border-bottom: 1px solid var(--grid); text-align: left; }
+table.cats th { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+table.cats td.r, table.cats th.r { text-align: right; }
+table.cats td.dim { color: var(--muted); }
+.alert { border-radius: var(--r); padding: 10px 12px; font-size: 0.9rem; display: grid; gap: 4px; }
+.alert p { margin: 0; }
+.alert.miss { background: var(--miss-soft); color: var(--ink); border-left: 3px solid var(--miss); }
+.alert.wait { background: var(--wait-soft); color: var(--ink); border-left: 3px solid var(--wait); }
+.alert.err { background: var(--miss-soft); color: var(--ink); border-left: 3px solid var(--miss); }
+.alert.ex { background: var(--accent-soft); color: var(--ink); border-left: 3px solid var(--accent); }
+.alert b { font-weight: 700; }
+.scale { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; font-size: 0.78rem; }
+.scale div { border: 1px solid var(--grid); border-radius: 4px; padding: 3px 4px; text-align: center; }
+.scale div b { display: block; font-family: var(--font-display); font-size: 0.95rem; }
+.scale div.on { border-color: var(--accent); background: var(--accent-soft); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; }
+button {
+  font: inherit; font-weight: 600; font-size: 0.88rem;
+  color: var(--accent); background: transparent;
+  border: 1px solid var(--rule); border-radius: 4px;
+  padding: 6px 12px; cursor: pointer;
+}
+button:hover { background: var(--accent-soft); }
+button.danger { color: var(--miss); }
+.fine { color: var(--muted); font-size: 0.8rem; margin: 0; }
+
+.bar {
+  display: none;
+  position: fixed; left: 0; right: 0; bottom: 0;
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+  padding-top: 10px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  align-items: center; justify-content: space-between; gap: 12px;
+  z-index: 5;
+}
+.bar .num { font-weight: 600; font-size: 1.15rem; }
+.bar a { color: var(--accent); font-weight: 600; font-size: 0.9rem; }
+@media (max-width: 960px) { .bar { display: flex; } }
+@media (prefers-reduced-motion: no-preference) { .chip, .big .pct { transition: color .15s, background-color .15s; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="top-row">
+      <div>
+        <div class="eyebrow" id="courseLine"></div>
+        <h1>Grade Estimator</h1>
+      </div>
+      <div class="asof">
+        <label for="asof">Estimate as of</label>
+        <input type="date" id="asof">
+        <small>Work due before this date that you leave blank counts as 0.</small>
+      </div>
+    </div>
+    <div class="notice" role="note">
+      <p><strong>This is an unofficial estimate, not your grade.</strong> Your official grade is the one as described in the syllabus.</p>
+      <ul>
+        <li>The estimate is only as accurate as the numbers you type. Copy each score exactly from WeBWorK, Blackboard, or your returned work, and double-check them.</li>
+        <li>Anything due before the date above that you leave blank counts as <b>0</b>. Choose <b>Excused</b> only if your instructor excused that assignment. Choose <b>Not graded yet</b> only if you turned it in and haven't received a score.</li>
+        <li>Nothing you type is sent anywhere. Your entries are saved only in this browser on this device.</li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="sections" id="sections"></div>
+
+    <aside class="summary" id="summary" aria-live="polite"></aside>
+  </div>
+</div>
+
+<div class="bar" id="bar"><span id="barText">Enter your scores</span><a href="#summary">See breakdown</a></div>
+
+<script>
+/* ===================== COURSE SETTINGS (edit here) ===================== */
+const COURSE = {
+  name: "Math 273-101 · Calculus I · Fall 2026",
+  instructor: "Andrew Hardt",
+  storageKey: "math273-fall2026-estimator-v1",
+};
+// Category weights in percent. They must total 100.
+const WEIGHTS = { ww: 10, quiz: 10, lab: 10, mid: 45, final: 25 };
+// Letter cutoffs (minimum percent). The score is rounded to ROUND_DECIMALS before comparing.
+const SCALE = [[93,"A"],[90,"A-"],[87,"B+"],[83,"B"],[80,"B-"],[77,"C+"],[70,"C"],[67,"D+"],[60,"D"],[0,"F"]];
+const ROUND_DECIMALS = 2;
+// Items. "due" is the date of the quiz/exam or the due date of the assignment (YYYY-MM-DD).
+// For WeBWorK, set pts to a number to fill in "points possible" for students; null lets them type it.
+// cap (optional) lets a score go above max, for bonus points: Exam 1 is out of 100 with up to 3 style points.
+const ITEMS = [
+  { id:"W0",  cat:"ww", name:"WeBWorK 0",  topic:"Precalculus",        due:"2026-08-31", pts:12 },
+  { id:"W1",  cat:"ww", name:"WeBWorK 1",  topic:"2.1, 2.2",           due:"2026-08-31", pts:7 },
+  { id:"W2",  cat:"ww", name:"WeBWorK 2",  topic:"2.3, 2.4",           due:"2026-09-08", pts:11 },
+  { id:"W3",  cat:"ww", name:"WeBWorK 3",  topic:"4.6",                due:"2026-09-14", pts:8 },
+  { id:"W4",  cat:"ww", name:"WeBWorK 4",  topic:"3.1, 3.2",           due:"2026-09-21", pts:9 },
+  { id:"W5",  cat:"ww", name:"WeBWorK 5",  topic:"3.3, 3.4",           due:"2026-09-28", pts:10 },
+  { id:"W6",  cat:"ww", name:"WeBWorK 6",  topic:"3.5, 3.6, 3.9",      due:"2026-10-05", pts:10 },
+  { id:"W7",  cat:"ww", name:"WeBWorK 7",  topic:"3.7, 3.8",           due:"2026-10-12", pts:10 },
+  { id:"W8",  cat:"ww", name:"WeBWorK 8",  topic:"3.9, 4.1",           due:"2026-10-19", pts:9 },
+  { id:"W9",  cat:"ww", name:"WeBWorK 9",  topic:"4.3",                due:"2026-10-26", pts:9 },
+  { id:"W10", cat:"ww", name:"WeBWorK 10", topic:"4.4, 4.5, 4.6",      due:"2026-11-02", pts:10 },
+  { id:"W11", cat:"ww", name:"WeBWorK 11", topic:"4.7, 4.8",           due:"2026-11-09", pts:10 },
+  { id:"W12", cat:"ww", name:"WeBWorK 12", topic:"4.10, 5.1",          due:"2026-11-16", pts:9 },
+  { id:"W13", cat:"ww", name:"WeBWorK 13", topic:"5.2, 5.3, 5.4",      due:"2026-11-30", pts:10 },
+  { id:"W14", cat:"ww", name:"WeBWorK 14", topic:"5.5",                due:"2026-12-07", pts:8 },
+
+  { id:"Q1",  cat:"quiz", name:"Quiz 1",  topic:"Precalculus",   due:"2026-08-26", max:10 },
+  { id:"Q2",  cat:"quiz", name:"Quiz 2",  topic:"2.1, 2.2",      due:"2026-09-02", max:10 },
+  { id:"Q3",  cat:"quiz", name:"Quiz 3",  topic:"2.3, 2.4",      due:"2026-09-09", max:10 },
+  { id:"Q4",  cat:"quiz", name:"Quiz 4",  topic:"4.6",           due:"2026-09-16", max:10 },
+  { id:"Q5",  cat:"quiz", name:"Quiz 5",  topic:"3.3, 3.4",      due:"2026-09-30", max:10 },
+  { id:"Q6",  cat:"quiz", name:"Quiz 6",  topic:"3.5, 3.6, 3.9", due:"2026-10-07", max:10 },
+  { id:"Q7",  cat:"quiz", name:"Quiz 7",  topic:"3.7, 3.8",      due:"2026-10-14", max:10 },
+  { id:"Q8",  cat:"quiz", name:"Quiz 8",  topic:"3.9, 4.1",      due:"2026-10-21", max:10 },
+  { id:"Q9",  cat:"quiz", name:"Quiz 9",  topic:"4.4, 4.5, 4.6", due:"2026-11-04", max:10 },
+  { id:"Q10", cat:"quiz", name:"Quiz 10", topic:"4.7, 4.8",      due:"2026-11-11", max:10 },
+  { id:"Q11", cat:"quiz", name:"Quiz 11", topic:"4.10, 5.1",     due:"2026-11-18", max:10 },
+
+  { id:"L1", cat:"lab", name:"Lab 1", topic:"Introduction to Limits",                 due:"2026-08-31", max:10 },
+  { id:"L2", cat:"lab", name:"Lab 2", topic:"Formal Definition of Limits",            due:"2026-09-14", max:10 },
+  { id:"L3", cat:"lab", name:"Lab 3", topic:"Tangent Lines and Linear Approximation", due:"2026-09-21", max:10 },
+  { id:"L5", cat:"lab", name:"Lab 5", topic:"Implicit Differentiation",               due:"2026-10-12", max:10 },
+  { id:"L6", cat:"lab", name:"Lab 6", topic:"Extreme Values",                         due:"2026-10-26", max:10 },
+  { id:"L7", cat:"lab", name:"Lab 7", topic:"Riemann Sums",                           due:"2026-11-16", max:10 },
+  { id:"L8", cat:"lab", name:"Lab 8", topic:"Newton’s Method",                   due:"2026-12-07", max:10 },
+
+  { id:"E1", cat:"mid", name:"Exam 1", topic:"2.1–2.4, 3.1, 3.2, 4.6",        due:"2026-09-23", max:100, cap:103 },
+  { id:"E2", cat:"mid", name:"Exam 2", topic:"3.3, 3.5–3.9, 4.1, 4.3",        due:"2026-10-28", max:100 },
+  { id:"E3", cat:"mid", name:"Exam 3", topic:"4.4–4.8, 4.10, 5.1–5.4",   due:"2026-12-02", max:100 },
+
+  { id:"F",  cat:"final", name:"Final exam", topic:"Cumulative", due:"2026-12-12", max:100 },
+];
+const CATS = [
+  { key:"ww",    title:"WeBWorK homework", rule:"Fraction of total points. WeBWorK scores appear right away, so there is no “not graded yet” option.", statuses:["score","excused"] },
+  { key:"quiz",  title:"Quizzes",          rule:"Each out of 10. Your lowest quiz is dropped automatically. An excused quiz does not use up the drop.", statuses:["score","excused","ng"] },
+  { key:"lab",   title:"SageMath labs",    rule:"Each out of 10. There is no Lab 4.", statuses:["score","excused","ng"] },
+  { key:"mid",   title:"Midterm exams",    rule:"Each out of 100, equally weighted.", statuses:["score","ng"] },
+  { key:"final", title:"Final exam",       rule:"Out of 100.", statuses:["score","ng"] },
+];
+/* ===================== end of settings ===================== */
+
+// ENGINE START
+function parseNum(s) {
+  if (s === undefined || s === null) return { blank: true };
+  const t = String(s).trim();
+  if (t === "") return { blank: true };
+  if (!/^[+]?(\d+(\.\d*)?|\.\d+)$/.test(t)) return { bad: true };
+  return { v: parseFloat(t) };
+}
+function letterFor(x) {
+  const f = Math.pow(10, ROUND_DECIMALS);
+  const r = Math.round(x * f + 1e-7) / f;
+  for (const [min, l] of SCALE) if (r >= min) return l;
+  return SCALE[SCALE.length - 1][1];
+}
+function compute(entries, asOf) {
+  const items = {};
+  const cat = {};
+  const errors = [], missing = [], waiting = [];
+  for (const c of CATS) cat[c.key] = { counted: [], ngZero: [] };
+
+  for (const it of ITEMS) {
+    const e = entries[it.id] || {};
+    const status = e.status || "score";
+    const past = it.due < asOf;
+    const r = { past, status };
+    items[it.id] = r;
+    if (status === "excused") { r.state = "excused"; continue; }
+    if (status === "ng") {
+      r.state = "ng"; waiting.push(it);
+      if (it.cat !== "ww") cat[it.cat].ngZero.push({ it, earned: 0, out: it.max });
+      continue;
+    }
+    const sc = parseNum(e.v);
+    let out = it.max;
+    if (it.cat === "ww") {
+      if (it.pts !== null && it.pts !== undefined) out = it.pts;
+      else {
+        const o = parseNum(e.out);
+        if (o.bad || (o.v !== undefined && o.v <= 0)) { r.state = "error"; r.msg = "Points possible must be a positive number."; errors.push(it); continue; }
+        out = o.blank ? null : o.v;
+      }
+    }
+    if (sc.bad) { r.state = "error"; r.msg = "Enter a number (digits and a decimal point only)."; errors.push(it); continue; }
+    if (sc.blank) {
+      if (!past) { r.state = "future"; continue; }
+      if (out === null) { r.state = "error"; r.msg = "Enter the points possible (shown in WeBWorK) so this missing assignment can count as 0."; errors.push(it); continue; }
+      r.state = "missing"; r.earned = 0; r.out = out; missing.push(it);
+      cat[it.cat].counted.push({ it, earned: 0, out });
+      continue;
+    }
+    if (out === null) { r.state = "error"; r.msg = "Enter the points possible (shown in WeBWorK)."; errors.push(it); continue; }
+    const cap = (it.cap !== undefined && it.cat !== "ww") ? it.cap : out;
+    if (sc.v > cap) { r.state = "error"; r.msg = cap > out ? "This score is higher than the maximum possible (" + cap + ", including bonus points)." : "This score is higher than the points possible (" + out + ")."; errors.push(it); continue; }
+    r.state = "counted"; r.earned = sc.v; r.out = out;
+    cat[it.cat].counted.push({ it, earned: sc.v, out });
+  }
+
+  function catPct(key, list) {
+    if (list.length === 0) return { pct: null };
+    if (key === "ww" || key === "lab") {
+      const E = list.reduce((s, x) => s + x.earned, 0), O = list.reduce((s, x) => s + x.out, 0);
+      return O > 0 ? { pct: 100 * E / O } : { pct: null };
+    }
+    const p = list.map(x => 100 * x.earned / x.out);
+    if (key === "quiz" && p.length >= 2) {
+      let lo = 0;
+      for (let i = 1; i < p.length; i++) if (p[i] < p[lo]) lo = i;
+      const s = p.reduce((a, b) => a + b, 0) - p[lo];
+      return { pct: s / (p.length - 1), dropped: list[lo].it.id };
+    }
+    return { pct: p.reduce((a, b) => a + b, 0) / p.length };
+  }
+  function course(useNgZero) {
+    const parts = {};
+    let num = 0, den = 0;
+    for (const c of CATS) {
+      const list = useNgZero ? cat[c.key].counted.concat(cat[c.key].ngZero) : cat[c.key].counted;
+      const res = catPct(c.key, list);
+      parts[c.key] = res;
+      if (res.pct !== null) { num += WEIGHTS[c.key] * res.pct; den += WEIGHTS[c.key]; }
+    }
+    const score = den > 0 ? num / den : null;
+    return { parts, den, score, letter: score === null ? null : letterFor(score) };
+  }
+  const main = course(false);
+  if (main.parts.quiz.dropped) items[main.parts.quiz.dropped].dropped = true;
+  const hasNgOther = cat.quiz.ngZero.length + cat.lab.ngZero.length + cat.mid.ngZero.length + cat.final.ngZero.length > 0;
+  const alt = hasNgOther ? course(true) : null;
+  return { items, main, alt, errors, missing, waiting, counts: Object.fromEntries(CATS.map(c => [c.key, cat[c.key].counted.length])) };
+}
+// ENGINE END
+
+/* ===================== page ===================== */
+const $ = (s, el = document) => el.querySelector(s);
+const STATUS_LABEL = { score: "Score", excused: "Excused", ng: "Not graded yet" };
+let entries = {};
+let exampleLoaded = false;
+
+function todayISO() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+}
+function fmtDate(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+}
+function fmtLong(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+}
+const f2 = x => x.toFixed(2);
+
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(COURSE.storageKey) || "null");
+    if (s && typeof s === "object") { entries = s.entries || {}; exampleLoaded = !!s.example; }
+  } catch (e) {}
+}
+function save() {
+  try { localStorage.setItem(COURSE.storageKey, JSON.stringify({ entries, example: exampleLoaded })); } catch (e) {}
+}
+
+function build() {
+  $("#courseLine").textContent = COURSE.name;
+  const host = $("#sections");
+  host.innerHTML = "";
+  for (const c of CATS) {
+    const sec = document.createElement("section");
+    sec.className = "cat";
+    sec.innerHTML =
+      '<div class="cat-head"><div><h2>' + c.title + '</h2><div class="rule">' + c.rule + '</div></div>' +
+      '<div><span class="eyebrow">' + WEIGHTS[c.key] + '% of grade</span> <span class="catpct" id="cp-' + c.key + '"></span></div></div>';
+    for (const it of ITEMS.filter(i => i.cat === c.key)) {
+      const row = document.createElement("div");
+      row.className = "row"; row.id = "row-" + it.id;
+      const opts = c.statuses.map(s => '<option value="' + s + '">' + STATUS_LABEL[s] + "</option>").join("");
+      let score;
+      if (c.key === "ww") {
+        const fixed = it.pts !== null && it.pts !== undefined;
+        score = '<input class="pts" type="text" inputmode="decimal" id="v-' + it.id + '" aria-label="' + it.name + ' points earned">' +
+                '<span class="of">/</span>' +
+                '<input class="pts" type="text" inputmode="decimal" id="o-' + it.id + '" aria-label="' + it.name + ' points possible"' +
+                (fixed ? ' value="' + it.pts + '" readonly tabindex="-1"' : ' placeholder="total"') + ">";
+      } else {
+        score = '<input class="pts" type="text" inputmode="decimal" id="v-' + it.id + '" aria-label="' + it.name + ' score">' +
+                '<span class="of">/ ' + it.max + "</span>";
+      }
+      const verb = (c.key === "ww" || c.key === "lab") ? "Due " : "";
+      row.innerHTML =
+        '<div class="name"><b>' + it.name + "</b><span>" + it.topic + (it.cap > it.max ? "; up to " + (it.cap - it.max) + " bonus points" : "") + "</span></div>" +
+        '<div class="due">' + verb + fmtDate(it.due) + "</div>" +
+        '<div class="status"><select id="s-' + it.id + '" aria-label="' + it.name + ' status">' + opts + "</select></div>" +
+        '<div class="score">' + score + "</div>" +
+        '<div class="chipcell"><span class="chip" id="c-' + it.id + '"></span></div>' +
+        '<p class="msg" id="m-' + it.id + '" hidden></p>';
+      sec.appendChild(row);
+    }
+    host.appendChild(sec);
+  }
+  host.addEventListener("input", onInput);
+  host.addEventListener("change", onInput);
+}
+
+function fillInputs() {
+  for (const it of ITEMS) {
+    const e = entries[it.id] || {};
+    $("#s-" + it.id).value = e.status || "score";
+    $("#v-" + it.id).value = e.v || "";
+    const o = $("#o-" + it.id);
+    if (o && !o.readOnly) o.value = e.out || "";
+  }
+}
+
+function onInput(ev) {
+  const t = ev.target;
+  if (!t.id) return;
+  const [k, id] = [t.id.slice(0, 1), t.id.slice(2)];
+  if (!ITEMS.some(i => i.id === id)) return;
+  entries[id] = entries[id] || {};
+  if (k === "s") entries[id].status = t.value;
+  if (k === "v") entries[id].v = t.value;
+  if (k === "o") entries[id].out = t.value;
+  save();
+  render();
+}
+
+function anythingEntered() {
+  return Object.values(entries).some(e => (e.status && e.status !== "score") || String(e.v || "").trim() !== "");
+}
+
+function render() {
+  const asOf = $("#asof").value || todayISO();
+  const R = compute(entries, asOf);
+  const any = anythingEntered();
+
+  for (const it of ITEMS) {
+    const r = R.items[it.id];
+    const row = $("#row-" + it.id), chip = $("#c-" + it.id), msg = $("#m-" + it.id);
+    const v = $("#v-" + it.id), o = $("#o-" + it.id);
+    row.classList.toggle("past", r.past);
+    const scoring = r.status === "score";
+    v.disabled = !scoring;
+    if (o && !o.readOnly) o.disabled = !scoring;
+    v.classList.toggle("bad", r.state === "error");
+    if (o && !o.readOnly) o.classList.toggle("bad", r.state === "error" && /possible/.test(r.msg || ""));
+    msg.hidden = r.state !== "error";
+    msg.textContent = r.msg || "";
+    let cls = "", txt = "";
+    if (r.state === "counted") {
+      const p = 100 * r.earned / r.out;
+      cls = r.dropped ? "drop" : "ok"; txt = (Math.round(p * 10) / 10) + "%";
+      if (r.dropped) chip.title = "Lowest quiz, dropped"; else chip.removeAttribute("title");
+    } else if (r.state === "missing") {
+      cls = r.dropped ? "drop" : "miss"; txt = r.dropped ? "0% dropped" : "missing = 0";
+    } else if (r.state === "excused") { cls = "exc"; txt = "excused"; }
+    else if (r.state === "ng") { cls = "wait"; txt = "not graded yet"; }
+    else if (r.state === "future") { cls = "future"; txt = "not due yet"; }
+    else if (r.state === "error") { cls = "err"; txt = "check entry"; }
+    if (r.dropped && r.state === "counted") txt += " dropped";
+    chip.className = "chip " + cls; chip.textContent = txt;
+  }
+  for (const c of CATS) {
+    const p = R.main.parts[c.key];
+    $("#cp-" + c.key).textContent = (R.errors.length || p.pct === null) ? "" : f2(p.pct) + "%";
+  }
+  renderSummary(R, asOf, any);
+}
+
+function listNames(arr) { return arr.map(i => i.name).join(", "); }
+
+function renderSummary(R, asOf, any) {
+  const S = $("#summary");
+  const blocked = R.errors.length > 0;
+  let h = '<div><div class="eyebrow">Estimate as of ' + fmtLong(asOf) + "</div></div>";
+
+  if (exampleLoaded) {
+    h += '<div class="alert ex"><p><b>Example scores are loaded.</b> These are made-up numbers, not yours. Clear them before entering your own.</p></div>';
+  }
+  if (!any) {
+    h += '<div class="big"><span class="pct">—</span></div>' +
+         '<p class="sub">Enter your scores on the left to see an estimate. Remember that anything due before ' + fmtLong(asOf) + ' that you leave blank will count as 0.</p>';
+    $("#barText").textContent = "Enter your scores";
+  } else if (blocked) {
+    h += '<div class="big"><span class="pct">—</span></div>' +
+         '<div class="alert err"><p><b>Fix ' + R.errors.length + " entr" + (R.errors.length === 1 ? "y" : "ies") + " before an estimate can be shown:</b> " +
+         listNames(R.errors) + ".</p></div>";
+    $("#barText").textContent = "Fix highlighted entries";
+  } else if (R.main.score === null) {
+    h += '<div class="big"><span class="pct">—</span></div><p class="sub">Nothing is due or scored yet as of this date.</p>';
+    $("#barText").textContent = "Nothing due yet";
+  } else {
+    h += '<div class="big"><span class="pct">' + f2(R.main.score) + '%</span><span class="letter">' + R.main.letter + "</span></div>";
+    $("#barText").innerHTML = '<span class="num">' + f2(R.main.score) + "%</span> · " + R.main.letter;
+
+    h += '<table class="cats"><thead><tr><th>Category</th><th class="r">Weight</th><th class="r">Your %</th></tr></thead><tbody>';
+    for (const c of CATS) {
+      const p = R.main.parts[c.key];
+      const inc = p.pct !== null;
+      h += "<tr><td" + (inc ? "" : ' class="dim"') + ">" + c.title + (c.key === "quiz" && p.dropped ? ' <span class="fine">(' + ITEMS.find(i => i.id === p.dropped).name + " dropped)</span>" : "") + "</td>" +
+           '<td class="r num' + (inc ? "" : " dim") + '">' + WEIGHTS[c.key] + "%</td>" +
+           '<td class="r num' + (inc ? "" : " dim") + '">' + (inc ? f2(p.pct) : "not yet") + "</td></tr>";
+    }
+    h += "</tbody></table>";
+    if (R.main.den < 100) {
+      h += '<p class="fine">Categories marked “not yet” have nothing due or scored, so they are left out and the other weights are scaled up to fill 100%. This estimate is based on ' + R.main.den + "% of the course weight.</p>";
+    }
+    if (R.missing.length) {
+      h += '<div class="alert miss"><p><b>Counted as 0 (missing):</b> ' + listNames(R.missing) + ".</p><p>If you did turn one of these in, enter its score. If your instructor excused it, choose Excused.</p></div>";
+    }
+    if (R.waiting.length) {
+      h += '<div class="alert wait"><p><b>Not graded yet, left out of the estimate:</b> ' + listNames(R.waiting) + ".</p>";
+      if (R.alt && R.alt.score !== null) h += "<p>If these all turned out to be 0, your estimate would be <b class=\"num\">" + f2(R.alt.score) + "%</b> (" + R.alt.letter + ").</p>";
+      h += "</div>";
+    }
+    h += '<div><div class="eyebrow" style="margin-bottom:6px">Grade scale (no curve)</div><div class="scale">';
+    const lows = SCALE.slice().reverse();
+    for (let i = 0; i < lows.length; i++) {
+      const [mn, l] = lows[i];
+      const hi = i + 1 < lows.length ? lows[i + 1][0] - 1 : 100;
+      h += '<div class="' + (l === R.main.letter ? "on" : "") + '"><b>' + l + '</b><span class="num">' + mn + "–" + hi + "</span></div>";
+    }
+    h += "</div></div>";
+  }
+  h += '<p class="fine">Unofficial estimate only. It uses the grading rules from the syllabus and the numbers you typed.</p>';
+  h += '<div class="tools"><button type="button" id="exBtn">' + (exampleLoaded ? "Clear example" : "Try an example") + '</button><button type="button" class="danger" id="clrBtn">Clear all entries</button></div>';
+  S.innerHTML = h;
+
+  $("#exBtn").onclick = () => { if (exampleLoaded) clearAll(); else loadExample(); };
+  const clr = $("#clrBtn");
+  clr.onclick = () => {
+    if (clr.dataset.armed) { clearAll(); return; }
+    clr.dataset.armed = "1"; clr.textContent = "Tap again to clear everything";
+    setTimeout(() => { if (document.body.contains(clr)) { delete clr.dataset.armed; clr.textContent = "Clear all entries"; } }, 4000);
+  };
+}
+
+function clearAll() {
+  entries = {}; exampleLoaded = false;
+  $("#asof").value = todayISO();
+  save(); fillInputs(); render();
+}
+function loadExample() {
+  const ww = [["11"],["7"],["9"],["6"],[""],["10"],["8"],["9"]];
+  entries = {};
+  ITEMS.filter(i => i.cat === "ww").slice(0, ww.length).forEach((it, k) => { entries[it.id] = { status: "score", v: ww[k][0] }; });
+  [["Q1","7"],["Q2","9"],["Q3","4"],["Q4","8"],["Q5","10"],["Q6","8.5"],["Q7",""]].forEach(([id, v]) => entries[id] = { status: "score", v });
+  entries.Q7.status = "ng";
+  [["L1","10"],["L2","9"],["L3",""],["L5","8"]].forEach(([id, v]) => entries[id] = { status: "score", v });
+  entries.L3.status = "excused";
+  entries.E1 = { status: "score", v: "78" };
+  exampleLoaded = true;
+  $("#asof").value = "2026-10-15";
+  save(); fillInputs(); render();
+}
+
+load();
+build();
+$("#asof").value = todayISO();
+$("#asof").addEventListener("change", render);
+$("#asof").addEventListener("input", render);
+fillInputs();
+render();
+</script>
+
+</body>
+</html>
